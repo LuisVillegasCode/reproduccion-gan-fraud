@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.coverage
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Variables y credenciales
+.env
+*.env
+
+# Editores y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Dataset original y datos procesados
+data/raw/**
+!data/raw/.gitkeep
+
+data/processed/**
+!data/processed/.gitkeep
+
+# Artefactos generados
+artifacts/**
+!artifacts/.gitkeep
+
+# Figuras y tablas generadas
+reports/figures/**
+!reports/figures/.gitkeep
+
+reports/tables/**
+!reports/tables/.gitkeep
+
+# Modelos y objetos serializados
+*.pt
+*.pth
+*.joblib
+*.pkl
+*.npz
+*.npy
+
+# Archivos temporales
+*.log
+*.tmp
