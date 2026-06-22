@@ -1,0 +1,147 @@
+# ==============================================================================
+# CONFIGURACIÓN GLOBAL - REPRODUCCIÓN GAN PARA DETECCIÓN DE FRAUDE
+# ==============================================================================
+
+project:
+  name: "reproduccion_gan_fraud"
+  seed: 42
+
+# ------------------------------------------------------------------------------
+# 1. ENRUTAMIENTO DE DATOS Y ARTEFACTOS
+# ------------------------------------------------------------------------------
+
+paths:
+  data:
+    raw_csv: "data/raw/creditcard.csv"
+    processed: "data/processed/"
+
+  artifacts:
+    phase1_data: "artifacts/phase1_data/"
+    phase2_baseline: "artifacts/phase2_baseline/"
+    phase3_gan: "artifacts/phase3_gan/"
+    phase4_augmentation: "artifacts/phase4_augmentation/"
+
+  reports:
+    figures: "reports/figures/"
+    tables: "reports/tables/"
+
+# ------------------------------------------------------------------------------
+# 2. PREPROCESAMIENTO Y PARTICIÓN DE DATOS
+# ------------------------------------------------------------------------------
+
+preprocessing:
+  target_column: "Class"
+  remove_duplicates: true
+
+  scaler:
+    method: "minmax"
+    feature_range: [0.0, 1.0]
+    fit_scope: "complete_clean_dataset"
+    clip_values: true
+
+  split:
+    train_legitimate: 169921
+    train_fraud: 315
+    validation_ratio: 0.10
+    stratified_validation: true
+
+# ------------------------------------------------------------------------------
+# 3. CARGA DE DATOS
+# ------------------------------------------------------------------------------
+
+data_loader:
+  num_workers: 2
+  pin_memory: true
+
+# ------------------------------------------------------------------------------
+# 4. MODELO CLASIFICADOR BASELINE
+# ------------------------------------------------------------------------------
+
+classifier_model:
+  input_dim: 30
+
+  hidden_layers:
+    - units: 30
+      activation: "relu"
+
+    - units: 30
+      activation: "sigmoid"
+
+  output_dim: 2
+
+  initialization:
+    method: "uniform"
+    min_value: -0.5
+    max_value: 0.5
+
+# ------------------------------------------------------------------------------
+# 5. ENTRENAMIENTO DEL CLASIFICADOR
+# ------------------------------------------------------------------------------
+
+classifier_training:
+  batch_size: 1024
+  learning_rate: 0.005
+  max_epochs: 100
+  min_epochs: 20
+  patience: 15
+  min_delta: 1.0e-5
+
+  loss: "cross_entropy"
+
+  optimizer:
+    name: "sgd"
+    nesterov: true
+
+  momentum:
+    initial: 0.5
+    final: 0.99
+    warmup_epochs: 10
+
+  model_selection:
+    primary_metric: "pr_auc"
+    tie_break_metric: "roc_auc"
+    restore_best_weights: true
+
+  classification_threshold: 0.5
+
+# ------------------------------------------------------------------------------
+# 6. ARQUITECTURA GAN
+# ------------------------------------------------------------------------------
+
+gan_model:
+  data_dim: 30
+  noise_dim: 100
+
+  generator:
+    hidden_activations:
+      - "relu"
+      - "relu"
+    output_activation: "sigmoid"
+
+  discriminator:
+    hidden_layers: [36, 36]
+    hidden_activation: "sigmoid"
+    output_activation: "sigmoid"
+
+# ------------------------------------------------------------------------------
+# 7. EXPERIMENTOS DE AUMENTO DE DATOS
+# ------------------------------------------------------------------------------
+
+augmentation:
+  methods:
+    - "gan"
+    - "smote"
+
+  generated_sample_counts:
+    - 79
+    - 158
+    - 315
+    - 630
+    - 945
+    - 1260
+    - 2520
+    - 3150
+    - 6300
+    - 31500
+
+  retrain_classifier_from_scratch: true
