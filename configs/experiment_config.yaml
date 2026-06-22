@@ -113,18 +113,57 @@ gan_model:
   noise_dim: 100
 
   generator:
-    hidden_activations:
-      - "relu"
-      - "relu"
+    hidden_layers: [100, 30]               # Decisión de reproducción
+    hidden_activations: ["relu", "relu"]
     output_activation: "sigmoid"
 
   discriminator:
     hidden_layers: [36, 36]
     hidden_activation: "sigmoid"
-    output_activation: "sigmoid"
 
 # ------------------------------------------------------------------------------
-# 7. EXPERIMENTOS DE AUMENTO DE DATOS
+# 7. ENTRENAMIENTO GAN
+# ------------------------------------------------------------------------------
+
+gan_training:
+  expected_fraud_samples: 315
+
+  batch_size: 32                           # Permite varios lotes con 315 fraudes
+  epochs: 100                              # Valor inicial sujeto a experimentación
+
+  generator_learning_rate: 0.005
+  discriminator_learning_rate: 0.005
+
+  generator_objective: "non_saturating"    # Mayor estabilidad de gradientes
+  discriminator_steps: 1
+  generator_steps: 1
+
+  optimizer:
+    name: "sgd"
+    nesterov: true
+
+  momentum:
+    initial: 0.5
+    final: 0.99
+    warmup_epochs: 10
+
+  initialization:
+    method: "uniform"
+    min_value: -0.5
+    max_value: 0.5
+
+  noise:
+    distribution: "normal"
+    mean: 0.0
+    std: 1.0
+
+  num_workers: 0
+  pin_memory: true
+  diagnostic_samples: 64
+  log_frequency: 10
+
+# ------------------------------------------------------------------------------
+# 8. EXPERIMENTOS DE AUMENTO DE DATOS
 # ------------------------------------------------------------------------------
 
 augmentation:
@@ -144,4 +183,7 @@ augmentation:
     - 6300
     - 31500
 
-  retrain_classifier_from_scratch: true
+  reuse_maximum_sample_pool: true
+  gan_generation_batch_size: 1024
+  smote_k_neighbors: 5
+  fail_fast: true
